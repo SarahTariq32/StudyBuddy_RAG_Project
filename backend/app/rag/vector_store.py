@@ -49,14 +49,21 @@ def search(query_embedding: list[float], top_k: int) -> list[dict]:
     Find the top_k child chunks closest to the query embedding.
     Returns a list of metadata dicts — each contains doc_id and parent_text.
     """
+    if _collection.count() == 0:
+        return []
+
+    count = _collection.count()
     results = _collection.query(
         query_embeddings=[query_embedding],
-        n_results=top_k,
+        n_results=min(top_k, count),
         include=["metadatas"],
     )
-    # results["metadatas"] is a list-of-lists (one list per query).
-    # We only ever send one query at a time, so we take [0].
-    return results["metadatas"][0]
+
+    metadatas = results.get("metadatas")
+    if not metadatas or not metadatas[0]:
+        return []
+
+    return metadatas[0]
 
 
 def delete_document(doc_id: str) -> None:

@@ -2,10 +2,17 @@ from app.config import LLM_PROVIDER
 from app.llm.gemini_provider import GeminiProvider
 from app.llm.groq_provider import GroqProvider
 
+_client = None
+
 def get_llm_client():
+    global _client
+    if _client is not None:
+        return _client
+
     if LLM_PROVIDER == "gemini":
-        return GeminiProvider()
+        _client = GeminiProvider()
     elif LLM_PROVIDER == "groq":
-        return GroqProvider()
+        _client = GroqProvider()
     else:
         raise ValueError(f"Unknown LLM_PROVIDER: {LLM_PROVIDER}")
+    return _client

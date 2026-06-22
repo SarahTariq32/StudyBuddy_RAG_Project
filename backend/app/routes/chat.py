@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.history.chat_history import get_recent_history, save_message
-from app.rag.generator import generate_answer
+from app.rag.generator import NOT_ENOUGH, generate_answer
 from app.rag.pipeline import retrieve_context
 from app.schemas import AskRequest, AskResponse
 
@@ -19,7 +19,14 @@ def ask(body: AskRequest):
     """
     history = get_recent_history(body.session_id)
     context = retrieve_context(body.question)
-    answer = generate_answer(body.question, context, history)
+
+    if not context:
+        answer = NOT_ENOUGH
+    else:
+        try:
+            answer = generate_answer(body.question, context, history)
+        except (RuntimeError, ValueError) as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     save_message(body.session_id, "user", body.question)
     save_message(body.session_id, "assistant", answer)

@@ -10,14 +10,15 @@ def retrieve_context(question: str) -> list[str]:
     dedupe parent chunks, and return up to MAX_CONTEXT_PARENTS unique parents.
     """
     queries = [question] + generate_multi_queries(question, NUM_MULTI_QUERIES)
+    queries = [q for q in queries if q]
+    if not queries:
+        return []
 
     seen: set[str] = set()
     parents: list[str] = []
 
-    for query in queries:
-        if not query:
-            continue
-        embedding = create_embeddings([query])[0]
+    # Embed all query variants in one batch — faster than one call per query.
+    for embedding in create_embeddings(queries):
         hits = vector_store.search(embedding, TOP_K)
         for meta in hits:
             parent_text = meta.get("parent_text", "")

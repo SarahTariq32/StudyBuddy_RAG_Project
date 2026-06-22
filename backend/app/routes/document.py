@@ -51,6 +51,14 @@ def upload_document(file: UploadFile = File(...)):
 
     # --- Indexing pipeline ---
     text = load_single_pdf(save_path)
+    if not text.strip():
+        os.remove(save_path)
+        conn.close()
+        raise HTTPException(
+            status_code=400,
+            detail="Could not extract text from this PDF. It may be scanned/image-only.",
+        )
+
     parent_chunks = create_parent_chunks(text, PARENT_CHUNK_SIZE, CHUNK_OVERLAP)
     child_chunks, parent_mapping = create_child_chunks(parent_chunks, CHILD_CHUNK_SIZE, CHUNK_OVERLAP)
     embeddings = create_embeddings(child_chunks)
