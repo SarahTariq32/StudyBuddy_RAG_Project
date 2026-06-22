@@ -4,7 +4,11 @@ from app.database import init_db
 from app.routes import chat, document
 
 app = FastAPI(title="RAG Backend")
-
+@app.on_event("startup")
+def startup():
+    init_db()
+    from app.rag.embeddings import _model  # forces model to load at startup
+    print(f"Embedding model loaded: {_model}")
 # --- CORS ---
 # The browser blocks requests from one origin (e.g. localhost:5173) to another
 # (localhost:8000) unless the server explicitly allows it. This middleware adds
