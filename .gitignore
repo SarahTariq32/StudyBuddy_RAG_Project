@@ -1,7 +1,24 @@
+# Environment files
 backend/.env
 frontend/.env
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Database
 backend/app.db
+
+# Storage
 backend/storage/chroma_db/
 backend/storage/pdfs/
+
+# Frontend build & deps
+frontend/node_modules/
+frontend/dist/
+
+# Misc
+*.zip
+venv/
+app.db
+*.zip

@@ -5,7 +5,7 @@ load_dotenv()
 
 # --- LLM Provider Selection ---
 # This one variable controls which provider the entire app uses.
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
 
 # --- Provider Credentials & Model Names ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -14,6 +14,10 @@ GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
+
+# --- OpenRouter ---
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-8b-instruct:free")
 # --- Embedding Model ---
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 

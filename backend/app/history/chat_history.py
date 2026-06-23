@@ -15,20 +15,46 @@ def save_message(session_id: str, role: str, message: str) -> None:
     conn.close()
 
 
+# def get_recent_history(session_id: str) -> list[dict]:
+#     """
+#     Return the last N_MESSAGES rows for this session, oldest first.
+#     Each item is {"role": ..., "message": ...}.
+#     """
+#     conn = get_connection()
+#     rows = conn.execute(
+#         """
+#         SELECT role, message FROM chat_history
+#         WHERE session_id = ?
+#         ORDER BY created_at DESC, id DESC
+#         LIMIT ?
+#         """,
+#         (session_id, N_MESSAGES),
+#     ).fetchall()
+#     conn.close()
+#     return [{"role": row["role"], "message": row["message"]} for row in reversed(rows)]
+
+
+
+# ...existing code...
 def get_recent_history(session_id: str) -> list[dict]:
     """
-    Return the last N_MESSAGES rows for this session, oldest first.
-    Each item is {"role": ..., "message": ...}.
+    Return recent history oldest->newest.
+    N_MESSAGES is treated as number of user turns, so fetch up to 2*N_MESSAGES rows.
     """
+    limit_rows = max(2, N_MESSAGES * 2)
+
     conn = get_connection()
     rows = conn.execute(
         """
-        SELECT role, message FROM chat_history
+        SELECT role, message
+        FROM chat_history
         WHERE session_id = ?
-        ORDER BY created_at DESC, id DESC
+        ORDER BY id DESC
         LIMIT ?
         """,
-        (session_id, N_MESSAGES),
+        (session_id, limit_rows),
     ).fetchall()
     conn.close()
+
     return [{"role": row["role"], "message": row["message"]} for row in reversed(rows)]
+# ...existing code...

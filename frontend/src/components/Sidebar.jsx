@@ -1,5 +1,5 @@
-// import { useEffect, useState } from 'react'
-// import { listPDFs } from '../api/documents.js'
+// import { useEffect, useState, useRef } from 'react'
+// import { listPDFs, uploadPDF, deletePDF } from '../api/documents.js'
 // import PDFList from './PDFList.jsx'
 // import UploadButton from './UploadButton.jsx'
 
@@ -7,38 +7,70 @@
 
 // function Sidebar() {
 //   const [docs, setDocs] = useState([])
+//   const pollRef = useRef(null)
 
-//   async function fetchDocs() {
-//     const data = await listPDFs()
-//     setDocs(data)
+//   function startPolling() {
+//     if (pollRef.current) return
+//     pollRef.current = setInterval(async () => {
+//       const data = await listPDFs()
+//       setDocs(data)
+//       const allReady = data.every(d => d.status === 'ready')
+//       if (allReady) {
+//         clearInterval(pollRef.current)
+//         pollRef.current = null
+//       }
+//     }, 3000)
 //   }
 
 //   useEffect(() => {
-//     fetchDocs()
+//     listPDFs().then(data => {
+//       setDocs(data)
+//       const hasProcessing = data.some(d => d.status === 'processing')
+//       if (hasProcessing) startPolling()
+//     })
+//     return () => {
+//       if (pollRef.current) clearInterval(pollRef.current)
+//     }
 //   }, [])
+
+//   async function handleUpload(file) {
+//     const newDoc = await uploadPDF(file)
+//     if (newDoc && newDoc.id) {
+//       setDocs(prev => [...prev, newDoc])
+//       startPolling()
+//     }
+//   }
+
+//   async function handleDelete(id) {
+//     await deletePDF(id)
+//     setDocs(prev => prev.filter(doc => doc.id !== id))
+//   }
 
 //   return (
 //     <div style={{
 //       width: '240px',
-//       minHeight: '100vh',
+//       height: '100vh',
 //       background: '#141414',
 //       padding: '1.5rem 1rem',
 //       borderRight: '1px solid #2a2a2a',
 //       display: 'flex',
 //       flexDirection: 'column',
-//       gap: '1rem'
+//       gap: '1rem',
+//       overflow: 'hidden'
 //     }}>
 //       <h2 style={{ color: '#fff', fontSize: '1rem', margin: 0 }}>Your PDFs</h2>
-//       <UploadButton onUpload={fetchDocs} disabled={docs.length >= MAX_PDFS} />
-//       <PDFList docs={docs} onDelete={fetchDocs} />
+//       <UploadButton onUpload={handleUpload} disabled={docs.length >= MAX_PDFS} />
+//       <PDFList docs={docs} onDelete={handleDelete} />
 //     </div>
 //   )
 // }
 
 // export default Sidebar
 
-import { useEffect, useState } from 'react'
-import { listPDFs } from '../api/documents.js'
+
+
+import { useEffect, useState, useRef } from 'react'
+import { listPDFs, uploadPDF } from '../api/documents.js'
 import PDFList from './PDFList.jsx'
 import UploadButton from './UploadButton.jsx'
 
@@ -46,31 +78,128 @@ const MAX_PDFS = 5
 
 function Sidebar() {
   const [docs, setDocs] = useState([])
+  const pollRef = useRef(null)
 
-  async function fetchDocs() {
+  async function refreshDocs() {
     const data = await listPDFs()
     setDocs(data)
+    return data
+  }
+
+  function startPolling() {
+    if (pollRef.current) return
+    pollRef.current = setInterval(async () => {
+      const data = await listPDFs()
+      setDocs(data)
+      const allReady = data.every(d => d.status === 'ready')
+      if (allReady) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
+    }, 3000)
   }
 
   useEffect(() => {
-    fetchDocs()
+    refreshDocs().then(data => {
+      const hasProcessing = data.some(d => d.status === 'processing')
+      if (hasProcessing) startPolling()
+    })
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
   }, [])
+
+  async function handleUpload(file) {
+    const newDoc = await uploadPDF(file)
+    if (newDoc && newDoc.id) {
+      setDocs(prev => [...prev, newDoc])
+      startPolling()
+    }
+  }
 
   return (
     <div style={{
       width: '240px',
       height: '100vh',
-      background: '#141414',
+      background: 'rgba(0, 5, 20, 0.6)',
+      backdropFilter: 'blur(12px)',
       padding: '1.5rem 1rem',
-      borderRight: '1px solid #2a2a2a',
+      borderRight: '1px solid rgba(0,180,255,0.15)',
       display: 'flex',
       flexDirection: 'column',
       gap: '1rem',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      position: 'relative',
     }}>
-      <h2 style={{ color: '#fff', fontSize: '1rem', margin: 0 }}>Your PDFs</h2>
-      <UploadButton onUpload={fetchDocs} disabled={docs.length >= MAX_PDFS} />
-      <PDFList docs={docs} onDelete={fetchDocs} />
+
+      {/* Top glow accent */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(0,180,255,0.4), transparent)',
+      }} />
+
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        paddingBottom: '0.75rem',
+        borderBottom: '1px solid rgba(0,180,255,0.1)',
+      }}>
+        {/* Blinking status dot */}
+        <div style={{
+          width: '6px', height: '6px',
+          borderRadius: '50%',
+          background: '#00c8ff',
+          boxShadow: '0 0 6px rgba(0,200,255,0.8)',
+          animation: 'blink 2s ease-in-out infinite',
+          flexShrink: 0,
+        }} />
+        <h2 style={{
+          color: '#e0e8ff',
+          fontSize: '0.85rem',
+          margin: 0,
+          fontWeight: '600',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+        }}>
+          Your PDFs
+        </h2>
+        {/* PDF count badge */}
+        <span style={{
+          marginLeft: 'auto',
+          fontSize: '0.7rem',
+          color: 'rgba(0,180,255,0.6)',
+          background: 'rgba(0,180,255,0.08)',
+          border: '1px solid rgba(0,180,255,0.2)',
+          borderRadius: '10px',
+          padding: '0.1rem 0.45rem',
+          letterSpacing: '0.05em',
+        }}>
+          {docs.length}/{MAX_PDFS}
+        </span>
+      </div>
+
+      <UploadButton onUpload={handleUpload} disabled={docs.length >= MAX_PDFS} />
+      <PDFList docs={docs} onDocumentsChanged={refreshDocs} />
+
+      {/* Bottom fade */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0, left: 0, right: 0,
+        height: '60px',
+        background: 'linear-gradient(to top, rgba(0,5,20,0.8), transparent)',
+        pointerEvents: 'none',
+      }} />
+
+      <style>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
     </div>
   )
 }

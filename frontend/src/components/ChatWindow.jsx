@@ -1,3 +1,4 @@
+
 // import { useEffect, useRef, useState } from 'react'
 // import { askQuestion } from '../api/chat.js'
 // import { getSessionId } from '../utils/session.js'
@@ -25,7 +26,14 @@
 //   }
 
 //   return (
-//     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', background: '#0f0f0f' }}>
+//     <div style={{
+//       flex: 1,
+//       display: 'flex',
+//       flexDirection: 'column',
+//       height: '100vh',
+//       overflow: 'hidden',
+//       background: '#0f0f0f'
+//     }}>
 //       <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
 //         {messages.length === 0 && (
 //           <p style={{ color: '#444', textAlign: 'center', marginTop: '3rem' }}>
@@ -48,7 +56,6 @@
 // }
 
 // export default ChatWindow
-
 
 import { useEffect, useRef, useState } from 'react'
 import { askQuestion } from '../api/chat.js'
@@ -83,11 +90,33 @@ function ChatWindow() {
       flexDirection: 'column',
       height: '100vh',
       overflow: 'hidden',
-      background: '#0f0f0f'
+      background: 'transparent',
+      position: 'relative',
     }}>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
+      {/* Semi-transparent content background */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(0, 5, 20, 0.5)',
+        backdropFilter: 'blur(2px)',
+        zIndex: -1,
+      }} />
+
+      {/* Messages container */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '1.5rem',
+        zIndex: 1,
+      }}>
         {messages.length === 0 && (
-          <p style={{ color: '#444', textAlign: 'center', marginTop: '3rem' }}>
+          <p style={{
+            color: 'rgba(100,150,255,0.4)',
+            textAlign: 'center',
+            marginTop: '3rem',
+            fontSize: '0.95rem',
+            letterSpacing: '0.05em',
+          }}>
             Upload a PDF and ask anything about it.
           </p>
         )}
@@ -95,13 +124,25 @@ function ChatWindow() {
           <Message key={i} role={msg.role} text={msg.text} />
         ))}
         {loading && (
-          <div style={{ color: '#555', fontSize: '0.9rem', paddingLeft: '0.5rem' }}>
+          <div style={{
+            color: 'rgba(0,180,255,0.6)',
+            fontSize: '0.9rem',
+            paddingLeft: '0.5rem',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}>
             Thinking...
           </div>
         )}
         <div ref={bottomRef} />
       </div>
       <InputBox onSend={handleSend} disabled={loading} />
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   )
 }
