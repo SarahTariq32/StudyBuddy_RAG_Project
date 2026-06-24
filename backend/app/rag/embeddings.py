@@ -1,9 +1,8 @@
-from sentence_transformers import SentenceTransformer
-from app.config import EMBEDDING_MODEL, EMBEDDING_BATCH_SIZE
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 
-# Load once at module import time — avoids reloading the model on every call.
-# The first run downloads the model weights; subsequent runs load from cache.
-_model = SentenceTransformer(EMBEDDING_MODEL)
+# Uses Chroma's ONNX-based default embedding model (CPU-friendly and lighter
+# than installing full PyTorch + sentence-transformers in container builds).
+_embedder = DefaultEmbeddingFunction()
 
 
 def create_embeddings(texts: list[str]) -> list[list[float]]:
@@ -11,10 +10,4 @@ def create_embeddings(texts: list[str]) -> list[list[float]]:
     Encode a list of strings into normalized embedding vectors.
     Returns a list of float lists (one per input text).
     """
-    embeddings = _model.encode(
-        texts,
-        normalize_embeddings=True,
-        batch_size=EMBEDDING_BATCH_SIZE,
-        show_progress_bar=False,
-    )
-    return embeddings.tolist()
+    return _embedder(texts)

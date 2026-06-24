@@ -37,11 +37,11 @@ MAX_TEXT_CHARS = int(os.getenv("MAX_TEXT_CHARS", "120000"))
 MAX_PARENT_TEXT_IN_METADATA = int(os.getenv("MAX_PARENT_TEXT_IN_METADATA", "900"))
 
 # --- Retrieval ---
-TOP_K = 6
+TOP_K = 8
 # 0 = skip multi-query rewrite (fastest). 4 = better recall, slower (extra LLM call).
-# Set to 1 for one alternative phrasing—good balance of recall and speed.
-NUM_MULTI_QUERIES = 1
-MAX_CONTEXT_PARENTS = 10
+# Set to 2 for better semantic coverage across query variants.
+NUM_MULTI_QUERIES = 2
+MAX_CONTEXT_PARENTS = 15
 
 # --- Conversation Memory ---
 N_MESSAGES = 5
@@ -54,3 +54,7 @@ MAX_PDFS = 5
 PDF_STORAGE_PATH = "storage/pdfs"
 CHROMA_PATH = "storage/chroma_db"
 DB_PATH = "app.db"
+
+# --- CORS ---
+# Comma-separated list, e.g. "https://my-frontend.vercel.app,http://localhost:5173"
+CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]

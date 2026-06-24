@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import init_db
+from app.config import CORS_ORIGINS
 from app.routes import chat, document
 
 app = FastAPI(title="RAG Backend")
@@ -12,7 +13,7 @@ app = FastAPI(title="RAG Backend")
 # to your deployed frontend URL in production.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -1,19 +1,18 @@
-fastapi
-uvicorn[standard]
-python-dotenv
-pydantic
+fastapi==0.138.0
+uvicorn[standard]==0.49.0
+python-dotenv==1.2.2
+pydantic==2.13.4
 
 # file uploads
-python-multipart
-aiofiles
+python-multipart==0.0.32
+aiofiles==25.1.0
 
 # RAG core
-chromadb
-sentence-transformers
-torch
-numpy
-pypdf
+chromadb==1.5.9
+numpy==2.4.6
+pypdf==6.14.2
 
 # LLM providers (both installed — .env decides which one is used at runtime)
-google-genai
-groq
+google-genai==2.9.0
+groq==1.5.0
+openai==1.95.1

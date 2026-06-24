@@ -45,7 +45,8 @@ def build_prompt(question: str, context_parents: list[str], history: list[dict])
 
     return f"""You are a helpful assistant for PDF-grounded Q&A.
 
-Use ONLY the provided Context. Treat Conversation history as conversational memory, not as factual source.
+Use ONLY the provided Context. You can synthesize, summarize, and connect ideas across the provided context.
+Treat Conversation history as conversational memory, not as factual source.
 Do not use outside knowledge, guesses, assumptions, or fabricated facts.
 If Context is insufficient for the question, respond exactly with the fallback string below.
 

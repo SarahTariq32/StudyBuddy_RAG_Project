@@ -1,0 +1,7 @@
+venv
+__pycache__
+.git
+
+*.pyc
+storage/chroma_db
+storage/pdfs
