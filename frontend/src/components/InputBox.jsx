@@ -62,7 +62,7 @@
 
 import { useState } from 'react'
 
-function InputBox({ onSend, disabled }) {
+function InputBox({ onSend, disabled, compact = false }) {
   const [text, setText] = useState('')
   const [isFocused, setIsFocused] = useState(false)
 
@@ -82,8 +82,8 @@ function InputBox({ onSend, disabled }) {
   return (
     <div style={{
       display: 'flex',
-      gap: '0.75rem',
-      padding: '1.5rem',
+      gap: compact ? '0.55rem' : '0.75rem',
+      padding: compact ? '0.8rem' : '1.5rem',
       borderTop: `1px solid rgba(0,180,255,${isFocused ? '0.3' : '0.1'})`,
       background: 'rgba(0, 5, 20, 0.3)',
       backdropFilter: 'blur(1px)',
@@ -97,16 +97,16 @@ function InputBox({ onSend, disabled }) {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder="Ask something about your PDFs..."
-        rows={2}
+        rows={compact ? 1 : 2}
         style={{
           flex: 1,
-          padding: '0.875rem 1rem',
+          padding: compact ? '0.72rem 0.8rem' : '0.875rem 1rem',
           background: 'rgba(0, 20, 40, 0.6)',
           color: '#e0e8ff',
           border: `1.5px solid rgba(0,180,255,${isFocused ? '0.5' : '0.2'})`,
           borderRadius: '10px',
           resize: 'none',
-          fontSize: '0.95rem',
+          fontSize: compact ? '0.9rem' : '0.95rem',
           fontFamily: "'Segoe UI', sans-serif",
           outline: 'none',
           transition: 'all 0.3s ease',
@@ -119,7 +119,7 @@ function InputBox({ onSend, disabled }) {
         onClick={handleSend}
         disabled={disabled}
         style={{
-          padding: '0.875rem 1rem',
+          padding: compact ? '0.72rem 0.82rem' : '0.875rem 1rem',
           background: disabled
             ? 'rgba(100,150,255,0.1)'
             : 'linear-gradient(135deg, rgba(0,180,255,0.8) 0%, rgba(0,200,255,1) 100%)',
@@ -134,8 +134,8 @@ function InputBox({ onSend, disabled }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          minWidth: '48px',
-          minHeight: '48px',
+          minWidth: compact ? '42px' : '48px',
+          minHeight: compact ? '42px' : '48px',
         }}
         onMouseEnter={(e) => {
           if (!disabled) {

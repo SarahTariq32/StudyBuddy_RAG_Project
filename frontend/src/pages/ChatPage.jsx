@@ -52,12 +52,14 @@
 
 
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Sidebar from '../components/Sidebar.jsx'
 import ChatWindow from '../components/ChatWindow.jsx'
 
 function ChatPage() {
   const canvasRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 900)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -135,10 +137,21 @@ function ChatPage() {
     }
   }, [])
 
+  useEffect(() => {
+    function handleResize() {
+      const mobile = window.innerWidth <= 900
+      setIsMobile(mobile)
+      setSidebarOpen(!mobile)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   return (
     <div style={{
       display: 'flex',
-      height: '100vh',
+      height: '100dvh',
       width: '100vw',
       overflow: 'hidden',
       background: 'radial-gradient(ellipse at 30% 50%, #000d1a 0%, #000208 60%, #000000 100%)',
@@ -154,10 +167,52 @@ function ChatPage() {
         background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,100,255,0.015) 2px,rgba(0,100,255,0.015) 4px)',
       }} />
 
+      {isMobile && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open PDFs sidebar"
+          style={{
+            position: 'fixed',
+            top: '0.85rem',
+            left: '0.85rem',
+            zIndex: 6,
+            width: '42px',
+            height: '42px',
+            borderRadius: '10px',
+            border: '1px solid rgba(0,200,255,0.45)',
+            background: 'rgba(0, 14, 30, 0.85)',
+            color: '#ccf2ff',
+            fontSize: '1.2rem',
+            lineHeight: 1,
+            cursor: 'pointer',
+            boxShadow: '0 0 22px rgba(0,180,255,0.2)',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          ☰
+        </button>
+      )}
+
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.45)',
+            zIndex: 4,
+          }}
+        />
+      )}
+
       {/* Main content */}
       <div style={{ display: 'flex', flex: 1, position: 'relative', zIndex: 2 }}>
-        <Sidebar />
-        <ChatWindow />
+        <Sidebar
+          isMobile={isMobile}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+        <ChatWindow topInset={isMobile ? 56 : 0} />
       </div>
 
       <style>{`

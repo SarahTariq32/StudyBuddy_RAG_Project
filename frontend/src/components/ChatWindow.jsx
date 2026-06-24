@@ -63,7 +63,7 @@ import { getSessionId } from '../utils/session.js'
 import Message from './Message.jsx'
 import InputBox from './InputBox.jsx'
 
-function ChatWindow() {
+function ChatWindow({ topInset = 0 }) {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
@@ -88,10 +88,11 @@ function ChatWindow() {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      height: '100dvh',
       overflow: 'hidden',
       background: 'transparent',
       position: 'relative',
+      paddingTop: topInset ? `${topInset}px` : 0,
     }}>
       {/* Semi-transparent content background */}
       <div style={{
@@ -106,14 +107,14 @@ function ChatWindow() {
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: '1.5rem',
+        padding: topInset ? '1rem 0.85rem' : '1.5rem',
         zIndex: 1,
       }}>
         {messages.length === 0 && (
           <p style={{
             color: 'rgba(100,150,255,0.4)',
             textAlign: 'center',
-            marginTop: '3rem',
+            marginTop: topInset ? '1.5rem' : '3rem',
             fontSize: '0.95rem',
             letterSpacing: '0.05em',
           }}>
@@ -135,7 +136,7 @@ function ChatWindow() {
         )}
         <div ref={bottomRef} />
       </div>
-      <InputBox onSend={handleSend} disabled={loading} />
+      <InputBox onSend={handleSend} disabled={loading} compact={Boolean(topInset)} />
 
       <style>{`
         @keyframes pulse {

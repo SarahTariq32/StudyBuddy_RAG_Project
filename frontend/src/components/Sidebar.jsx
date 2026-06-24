@@ -28,7 +28,7 @@ function writeDocsCache(docs) {
   }
 }
 
-function Sidebar() {
+function Sidebar({ isMobile = false, isOpen = true, onClose = () => {} }) {
   const [docs, setDocs] = useState(() => readDocsCache())
   const [isLoadingDocs, setIsLoadingDocs] = useState(() => readDocsCache().length === 0)
   const [notification, setNotification] = useState('')
@@ -135,17 +135,23 @@ function Sidebar() {
 
   return (
     <div style={{
-      width: '240px',
-      height: '100vh',
+      width: isMobile ? 'min(82vw, 320px)' : '240px',
+      height: '100dvh',
       background: 'rgba(0, 5, 20, 0.6)',
       backdropFilter: 'blur(12px)',
-      padding: '1.5rem 1rem',
+      padding: isMobile ? '1rem 0.85rem' : '1.5rem 1rem',
       borderRight: '1px solid rgba(0,180,255,0.15)',
       display: 'flex',
       flexDirection: 'column',
       gap: '1rem',
       overflow: 'hidden',
-      position: 'relative',
+      position: isMobile ? 'fixed' : 'relative',
+      top: 0,
+      left: 0,
+      zIndex: isMobile ? 5 : 2,
+      transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(-104%)') : 'none',
+      transition: isMobile ? 'transform 0.22s ease' : 'none',
+      boxShadow: isMobile ? '0 0 26px rgba(0, 0, 0, 0.5)' : 'none',
     }}>
 
       {/* Top glow accent */}
@@ -175,7 +181,7 @@ function Sidebar() {
         }} />
         <h2 style={{
           color: '#e0e8ff',
-          fontSize: '0.85rem',
+          fontSize: isMobile ? '0.8rem' : '0.85rem',
           margin: 0,
           fontWeight: '600',
           letterSpacing: '0.1em',
@@ -196,6 +202,26 @@ function Sidebar() {
         }}>
           {docs.length}/{MAX_PDFS}
         </span>
+        {isMobile && (
+          <button
+            onClick={onClose}
+            aria-label="Close PDFs sidebar"
+            style={{
+              marginLeft: '0.5rem',
+              width: '28px',
+              height: '28px',
+              borderRadius: '8px',
+              border: '1px solid rgba(0,180,255,0.3)',
+              background: 'rgba(0, 15, 30, 0.7)',
+              color: '#9fdfff',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        )}
       </div>
 
       <UploadButton onUpload={handleUpload} disabled={docs.length >= MAX_PDFS} />
