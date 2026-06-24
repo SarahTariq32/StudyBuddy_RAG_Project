@@ -15,5 +15,19 @@ def generate_multi_queries(question: str, n: int) -> list[str]:
         f"Question: {question}"
     )
     response = get_llm_client().generate(prompt)
-    lines = [line.strip() for line in response.split("\n") if line.strip()]
-    return lines
+    lines = [line.strip(" -\t") for line in response.split("\n") if line.strip()]
+
+    # Keep unique, non-trivial rewrites and cap at n.
+    rewrites: list[str] = []
+    seen: set[str] = set()
+    for line in lines:
+        if len(line) < 4:
+            continue
+        normalized = line.lower()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        rewrites.append(line)
+        if len(rewrites) >= n:
+            break
+    return rewrites

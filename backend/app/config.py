@@ -34,7 +34,7 @@ MAX_CHILD_CHUNKS = int(os.getenv("MAX_CHILD_CHUNKS", "450"))
 MAX_PDF_PAGES = int(os.getenv("MAX_PDF_PAGES", "40"))
 MAX_TEXT_CHARS = int(os.getenv("MAX_TEXT_CHARS", "120000"))
 # Reduce write amplification in vector metadata.
-MAX_PARENT_TEXT_IN_METADATA = int(os.getenv("MAX_PARENT_TEXT_IN_METADATA", "900"))
+MAX_PARENT_TEXT_IN_METADATA = int(os.getenv("MAX_PARENT_TEXT_IN_METADATA", "1800"))
 
 # --- Retrieval ---
 TOP_K = 8

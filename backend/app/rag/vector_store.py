@@ -47,7 +47,7 @@ def add_chunks(
 def search(query_embedding: list[float], top_k: int) -> list[dict]:
     """
     Find the top_k child chunks closest to the query embedding.
-    Returns a list of metadata dicts — each contains doc_id and parent_text.
+    Returns a list of dicts with metadata and distance score.
     """
     if _collection.count() == 0:
         return []
@@ -56,14 +56,24 @@ def search(query_embedding: list[float], top_k: int) -> list[dict]:
     results = _collection.query(
         query_embeddings=[query_embedding],
         n_results=min(top_k, count),
-        include=["metadatas"],
+        include=["metadatas", "distances"],
     )
 
     metadatas = results.get("metadatas")
+    distances = results.get("distances")
     if not metadatas or not metadatas[0]:
         return []
 
-    return metadatas[0]
+    scored_hits: list[dict] = []
+    row_distances = distances[0] if distances and distances[0] else []
+    for i, metadata in enumerate(metadatas[0]):
+        hit = dict(metadata or {})
+        if not hit.get("parent_text"):
+            print(f"WARNING: Missing parent_text metadata in search hit index={i}")
+        hit["distance"] = row_distances[i] if i < len(row_distances) else 1e9
+        scored_hits.append(hit)
+
+    return scored_hits
 
 
 def delete_document(doc_id: str) -> None:

@@ -33,6 +33,8 @@ from app.llm.base import LLMProvider
 
 class OpenRouterProvider(LLMProvider):
     def __init__(self):
+        if not OPENROUTER_API_KEY:
+            raise ValueError("OPENROUTER_API_KEY is missing. Add it to your .env file.")
         self.client = OpenAI(
             api_key=OPENROUTER_API_KEY,
             base_url="https://openrouter.ai/api/v1",

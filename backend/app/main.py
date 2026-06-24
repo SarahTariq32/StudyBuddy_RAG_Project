@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import init_db
 from app.config import CORS_ORIGINS
 from app.routes import chat, document
+from app.llm.factory import get_llm_client
 
 app = FastAPI(title="RAG Backend")
 
@@ -25,6 +26,8 @@ app.add_middleware(
 def startup():
     init_db()
     print("✓ Database initialized")
+    get_llm_client()
+    print("✓ LLM provider initialized")
 
 
 app.include_router(document.router)

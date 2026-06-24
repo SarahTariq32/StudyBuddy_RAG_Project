@@ -84,6 +84,9 @@ def index_in_background(doc_id, save_path, filename):
         parent_chunks = create_parent_chunks(text, PARENT_CHUNK_SIZE, CHUNK_OVERLAP)
         child_chunks, parent_mapping = create_child_chunks(parent_chunks, CHILD_CHUNK_SIZE, CHUNK_OVERLAP)
 
+        if not child_chunks:
+            raise ValueError("No valid chunks were produced from the document")
+
         if len(child_chunks) > MAX_CHILD_CHUNKS:
             # Keep representative coverage across the document instead of only early pages.
             total = len(child_chunks)
@@ -96,6 +99,8 @@ def index_in_background(doc_id, save_path, filename):
             return
 
         embeddings = create_embeddings(child_chunks)
+        if len(embeddings) != len(child_chunks):
+            raise RuntimeError("Embedding count mismatch with child chunks")
         if not _document_exists(doc_id):
             return
 

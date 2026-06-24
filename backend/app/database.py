@@ -16,7 +16,7 @@ def init_db():
             id TEXT PRIMARY KEY,
             filename TEXT NOT NULL,
             uploaded_at TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'ready' ,                
+            status TEXT NOT NULL DEFAULT 'processing' ,                
             
             content_hash TEXT
         )
