@@ -68,6 +68,13 @@ PDF_STORAGE_PATH = os.getenv("PDF_STORAGE_PATH", os.path.join(_BASE_DIR, "storag
 CHROMA_PATH = os.getenv("CHROMA_PATH", os.path.join(_BASE_DIR, "storage", "chroma_db"))
 DB_PATH = os.getenv("DB_PATH", os.path.join(_BASE_DIR, "storage", "app.db"))
 
+# --- Optional Chroma Server Mode ---
+# If CHROMA_HOST is set, backend will connect to a separate ChromaDB service
+# (e.g., docker-compose service named "db") instead of local PersistentClient.
+CHROMA_HOST = os.getenv("CHROMA_HOST", "").strip()
+CHROMA_PORT = int(os.getenv("CHROMA_PORT", "8000"))
+CHROMA_COLLECTION = os.getenv("CHROMA_COLLECTION", "documents")
+
 # --- CORS ---
 # Comma-separated list, e.g. "https://my-frontend.vercel.app,http://localhost:5173"
 CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]

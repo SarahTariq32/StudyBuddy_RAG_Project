@@ -1,11 +1,25 @@
 import chromadb
-from app.config import CHROMA_PATH, MAX_PARENT_TEXT_IN_METADATA
+from app.config import (
+    CHROMA_PATH,
+    CHROMA_HOST,
+    CHROMA_PORT,
+    CHROMA_COLLECTION,
+    MAX_PARENT_TEXT_IN_METADATA,
+)
 
 # One persistent ChromaDB client for the whole app lifetime.
 # "persistent" means the collection is saved to disk at CHROMA_PATH
 # and survives restarts — unlike an in-memory client which resets every run.
-_client = chromadb.PersistentClient(path=CHROMA_PATH)
-_collection = _client.get_or_create_collection(name="documents")
+if CHROMA_HOST:
+    # Docker/service mode: use external Chroma service (e.g. compose service "db").
+    _client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
+    print(f"✓ ChromaDB client connected via HTTP at {CHROMA_HOST}:{CHROMA_PORT}")
+else:
+    # Standalone mode: use local persistent path.
+    _client = chromadb.PersistentClient(path=CHROMA_PATH)
+    print(f"✓ ChromaDB client using local path: {CHROMA_PATH}")
+
+_collection = _client.get_or_create_collection(name=CHROMA_COLLECTION)
 
 
 def add_chunks(

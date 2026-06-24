@@ -1,0 +1,121 @@
+services:
+  # Vector Database Service (ChromaDB)
+  db:
+    image: chromadb/chroma:0.5.11
+    ports:
+      - "8001:8000"
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+      PERSIST_DIRECTORY: /chroma/chroma
+    volumes:
+      - chroma-data:/chroma/chroma
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # LLM Configuration
+      LLM_PROVIDER: ${LLM_PROVIDER:-groq}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-meta-llama/llama-3.3-8b-instruct:free}
+      
+      # Storage Paths (persistent volumes)
+      PDF_STORAGE_PATH: /data/pdfs
+      DB_PATH: /data/app.db
+
+      # ChromaDB runs as dedicated docker-compose service "db"
+      CHROMA_HOST: db
+      CHROMA_PORT: 8000
+      CHROMA_COLLECTION: documents
+      
+      # CORS - Allow frontend service
+      CORS_ORIGINS: http://frontend:5173,http://localhost:5173,http://localhost:3000
+      
+      # File Size Limit
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
+      
+      # Embedding & Retrieval Tuning (optional)
+      EMBEDDING_BATCH_SIZE: ${EMBEDDING_BATCH_SIZE:-48}
+      PARENT_CHUNK_SIZE: ${PARENT_CHUNK_SIZE:-1500}
+      CHILD_CHUNK_SIZE: ${CHILD_CHUNK_SIZE:-500}
+      CHUNK_OVERLAP: ${CHUNK_OVERLAP:-50}
+      MAX_CHILD_CHUNKS: ${MAX_CHILD_CHUNKS:-450}
+      MAX_PDF_PAGES: ${MAX_PDF_PAGES:-40}
+      NUM_MULTI_QUERIES: ${NUM_MULTI_QUERIES:-2}
+      DISTANCE_THRESHOLD: ${DISTANCE_THRESHOLD:-1.2}
+    
+    volumes:
+      # Persistent storage for PDFs and SQLite
+      - rag-data:/data
+    
+    networks:
+      - rag-network
+
+    depends_on:
+      db:
+        condition: service_healthy
+    
+    # Wait for service to be healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Web Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    environment:
+      # Backend API URL (service name in docker-compose network)
+      VITE_API_URL: http://backend:8000
+    
+    networks:
+      - rag-network
+    
+    # Frontend depends on backend being ready
+    depends_on:
+      backend:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:5173/', (r) => process.exit(r.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1));"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+# Named volume for persistent data storage
+volumes:
+  chroma-data:
+    driver: local
+  rag-data:
+    driver: local
+
+# Shared network for service communication
+networks:
+  rag-network:
+    driver: bridge

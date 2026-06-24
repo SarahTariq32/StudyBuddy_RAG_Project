@@ -48,8 +48,13 @@ def startup():
         print(f"⚠ Reset {stuck} stuck 'processing' document(s) to 'error' on startup")
     conn.close()
 
-    get_llm_client()
-    print("✓ LLM provider initialized")
+    try:
+        get_llm_client()
+        print("✓ LLM provider initialized")
+    except Exception as exc:
+        # Keep API bootable even when keys are missing; /ask will surface
+        # the provider error when a request requires LLM access.
+        print(f"⚠ LLM provider not initialized at startup: {exc}")
 
 
 app.include_router(document.router)

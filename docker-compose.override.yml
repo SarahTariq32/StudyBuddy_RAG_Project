@@ -1,0 +1,56 @@
+# Docker Compose Override for Local Development
+# This file is automatically loaded alongside docker-compose.yml
+# It overrides settings for a better development experience
+# (Hot reload, volume mounts, debug logging)
+
+services:
+  db:
+    ports:
+      - "8001:8000"
+
+  backend:
+    # Build with host's code for live development
+    volumes:
+      # Mount source code for live reloading
+      - ./backend/app:/app/app
+      # Keep data persistent across restarts
+      - rag-data:/data
+    
+    # Override CMD to use reload in development
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    
+    environment:
+      # Enable debug logging in development
+      LOG_LEVEL: debug
+    
+    networks:
+      - rag-network
+
+  frontend:
+    # Run dev server instead of production build for hot reload
+    build:
+      context: ./frontend
+      target: builder
+    
+    command: npm run dev -- --host 0.0.0.0
+    
+    volumes:
+      # Mount source code for hot reload
+      - ./frontend/src:/app/src
+      # Don't mount node_modules to avoid conflicts
+    
+    ports:
+      - "5173:5173"
+    
+    networks:
+      - rag-network
+    
+    environment:
+      # In dev, both localhost and service name should work
+      VITE_API_URL: http://backend:8000
+
+volumes:
+  rag-data:
+
+networks:
+  rag-network:

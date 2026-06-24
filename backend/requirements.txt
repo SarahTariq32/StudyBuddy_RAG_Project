@@ -8,7 +8,7 @@ python-multipart==0.0.32
 aiofiles==25.1.0
 
 # RAG core
-chromadb==1.5.9
+chromadb==0.5.11
 numpy==2.4.6
 pypdf==6.14.2
 
