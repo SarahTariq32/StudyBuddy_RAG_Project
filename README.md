@@ -90,7 +90,7 @@ A modern full-stack application that lets you upload PDF documents and ask natur
 │  RAG Pipeline:                                              │
 │  ├─ PDF Loader (pypdf)                                     │
 │  ├─ Chunking (parent + child splits)                       │
-│  ├─ Embeddings (ONNX-based, BAAI/bge-small)               │
+│  ├─ Embeddings (ONNX-based)               │
 │  ├─ Vector DB (ChromaDB persistent storage)                │
 │  ├─ Query Rewriter (LLM-powered multi-query)               │
 │  ├─ Retriever (semantic search + filtering)                │
@@ -423,7 +423,7 @@ User asks: "What is the capital of France?"
     ↓
 Check if any PDFs are ready (if not: show "no docs" message)
     ↓
-Fetch conversation history (last 5 user turns)
+Fetch conversation history 
     ↓
 Rewrite question using history context
     → "What is the capital of France?" (if no history)
