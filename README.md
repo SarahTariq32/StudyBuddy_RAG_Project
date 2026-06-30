@@ -2,8 +2,7 @@
 
 A modern full-stack application that lets you upload PDF documents and ask natural language questions about them. Powered by Retrieval-Augmented Generation (RAG), it uses vector embeddings and semantic search to find relevant content from your PDFs and generates intelligent answers backed by source documents.
 
-**Live Demo:** https://studybuddy-frontend.vercel.app
-
+**Live Demo:** https://study-buddy-rag-project.vercel.app/
 ---
 
 ## Table of Contents
